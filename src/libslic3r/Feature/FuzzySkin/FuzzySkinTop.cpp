@@ -6,6 +6,7 @@
 ///|/
 #include "FuzzySkin.hpp"
 
+#include "libslic3r/ClipperUtils.hpp"
 #include "libslic3r/ExtrusionEntity.hpp"
 #include "libslic3r/ExtrusionEntityCollection.hpp"
 #include "libslic3r/Layer.hpp"
@@ -16,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <optional>
 
 namespace Slic3r {
@@ -40,6 +42,7 @@ struct TopFuzzSettings
     double            layer_height{0.};
     double            slice_z{0.};
     FuzzySkinConfig   noise;
+    const ExPolygons *painted_areas{nullptr};
 };
 
 std::optional<TopFuzzSettings> resolve_settings(const LayerRegion &region)
@@ -51,6 +54,11 @@ std::optional<TopFuzzSettings> resolve_settings(const LayerRegion &region)
     const Layer *layer = region.layer();
     TopFuzzSettings settings;
 
+    if (config.fuzzy_skin_top_area == FuzzySkinTopArea::PaintedOnly) {
+        if (layer->fuzzy_skin_painted_areas.empty())
+            return std::nullopt;
+        settings.painted_areas = &layer->fuzzy_skin_painted_areas;
+    }
 
     const bool custom = config.fuzzy_skin_top_params == FuzzySkinTopParams::Custom;
     settings.thickness      = custom ? config.fuzzy_skin_top_thickness.value      : config.fuzzy_skin_thickness.value;
@@ -265,7 +273,36 @@ void texture_path(ExtrusionPath &path, const TopFuzzSettings &settings, Extrusio
         modulate_flow(path, settings, settings.mode == FuzzySkinTopMode::Combined, out);
 }
 
+std::unique_ptr<ExtrusionPath> clone_with(const ExtrusionPath &path, Polyline &&polyline)
+{
+    auto piece = std::unique_ptr<ExtrusionPath>(static_cast<ExtrusionPath *>(path.clone()));
+    piece->polyline = Polyline3(std::move(polyline));
+    piece->polyline.fitting_result.clear();
+    piece->z_contoured = false;
+    return piece;
+}
 
+void texture_painted_parts(const ExtrusionPath &path, const TopFuzzSettings &settings, ExtrusionEntitiesPtr &out)
+{
+    const Polylines whole{path.polyline.to_polyline()};
+    Polylines       painted   = intersection_pl(whole, *settings.painted_areas);
+    Polylines       unpainted = diff_pl(whole, *settings.painted_areas);
+
+    for (Polyline &polyline : painted) {
+        if (polyline.size() < 2)
+            continue;
+        std::unique_ptr<ExtrusionPath> piece = clone_with(path, std::move(polyline));
+        ExtrusionEntitiesPtr           produced;
+        texture_path(*piece, settings, produced);
+        if (produced.empty())
+            out.emplace_back(piece.release());
+        else
+            append(out, std::move(produced));
+    }
+    for (Polyline &polyline : unpainted)
+        if (polyline.size() >= 2)
+            out.emplace_back(clone_with(path, std::move(polyline)).release());
+}
 
 void texture_collection(ExtrusionEntityCollection &collection, const TopFuzzSettings &settings);
 
@@ -290,6 +327,17 @@ void texture_entity(ExtrusionEntity *entity, const TopFuzzSettings &settings, Ex
     auto *path = dynamic_cast<ExtrusionPath *>(entity);
     if (path == nullptr || path->role() != erTopSolidInfill) {
         out.emplace_back(entity);
+        return;
+    }
+
+    if (settings.painted_areas != nullptr) {
+        const size_t before = out.size();
+        texture_painted_parts(*path, settings, out);
+        if (out.size() == before) {
+            out.emplace_back(entity);
+            return;
+        }
+        delete entity;
         return;
     }
 

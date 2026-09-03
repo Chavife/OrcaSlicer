@@ -1097,6 +1097,7 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, in
     toggle_line("fuzzy_skin_ripple_offset", is_ripple && has_fuzzy_skin);
     toggle_line("fuzzy_skin_layers_between_ripple_offset", is_ripple && has_fuzzy_skin);
 
+    toggle_line("fuzzy_skin_top_area", has_top_fuzzy_skin);
     toggle_line("fuzzy_skin_top_params", has_top_fuzzy_skin);
     toggle_line("fuzzy_skin_top_point_distance", has_top_fuzzy_skin && top_fuzzy_custom);
     toggle_line("fuzzy_skin_top_thickness", has_top_fuzzy_skin && top_fuzzy_custom);

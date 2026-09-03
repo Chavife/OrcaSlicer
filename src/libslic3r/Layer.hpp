@@ -155,6 +155,9 @@ public:
     // These lslices are also used to detect overhangs and overlaps between successive layers, therefore it is important
     // that the 1st lslice is not compensated by the Elephant foot compensation algorithm.
     ExPolygons 				 lslices;
+    // ORCA: paint-on fuzzy skin areas, including painted horizontal facets projected onto top
+    // and bottom surfaces. Empty unless the object is fuzzy skin painted.
+    ExPolygons               fuzzy_skin_painted_areas;
     ExPolygons 				 lslices_extrudable;  // BBS: the extrudable part of lslices used for tree support
     std::vector<BoundingBox> lslices_bboxes;
     // Orca: for separated infills / per-model centering. Aligned with lslices: for each island, the

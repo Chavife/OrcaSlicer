@@ -1448,6 +1448,7 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "infill_overhang_angle"
             // ORCA: the fills must be regenerated before the top surface pass can re-run.
             || opt_key == "fuzzy_skin_top"
+            || opt_key == "fuzzy_skin_top_area"
             || opt_key == "fuzzy_skin_top_params"
             || opt_key == "fuzzy_skin_top_thickness"
             || opt_key == "fuzzy_skin_top_point_distance") {

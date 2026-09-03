@@ -3082,6 +3082,7 @@ void TabPrint::build()
         optgroup->append_single_option_line("fuzzy_skin_layers_between_ripple_offset", "others_settings_fuzzy_skin#layers-between-ripple-offset");
         optgroup->append_single_option_line("fuzzy_skin_first_layer", "others_settings_fuzzy_skin#apply-fuzzy-skin-to-first-layer");
         optgroup->append_single_option_line("fuzzy_skin_top", "others_settings_fuzzy_skin#top-surfaces");
+        optgroup->append_single_option_line("fuzzy_skin_top_area", "others_settings_fuzzy_skin#top-surfaces");
         optgroup->append_single_option_line("fuzzy_skin_top_params", "others_settings_fuzzy_skin#top-surfaces");
         optgroup->append_single_option_line("fuzzy_skin_top_point_distance", "others_settings_fuzzy_skin#top-surfaces");
         optgroup->append_single_option_line("fuzzy_skin_top_thickness", "others_settings_fuzzy_skin#top-surfaces");

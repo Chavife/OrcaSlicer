@@ -256,6 +256,11 @@ static t_config_enum_values s_keys_map_FuzzySkinTopParams {
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(FuzzySkinTopParams)
 
+static t_config_enum_values s_keys_map_FuzzySkinTopArea {
+    { "all",          int(FuzzySkinTopArea::AllTopSurfaces) },
+    { "painted_only", int(FuzzySkinTopArea::PaintedOnly) }
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(FuzzySkinTopArea)
 
 static t_config_enum_values s_keys_map_TopSurfaceExpansionDirection {
     { "inward_and_outward", int(TopSurfaceExpansionDirection::InwardAndOutward) },
@@ -4002,6 +4007,24 @@ void PrintConfigDef::init_fff_params()
     def->enum_labels.push_back(L("Combined"));
     def->mode = comSimple;
     def->set_default_value(new ConfigOptionEnum<FuzzySkinTopMode>(FuzzySkinTopMode::Disabled));
+
+    def = this->add("fuzzy_skin_top_area", coEnum);
+    def->label = L("Top surface area");
+    def->category = L("Others");
+    def->tooltip = L("Which top surfaces get the fuzz.\n\n"
+                     "All top surfaces: every top surface on the object.\n"
+                     "Painted only: only where fuzzy skin has been painted on with the paint tool. "
+                     "Note that the brush is shared with the wall fuzzy skin, so the top faces themselves "
+                     "have to be painted - painting a side wall will not put fuzz on the top.\n\n"
+                     "This is independent of the wall fuzzy skin type, so painting for the walls does not "
+                     "change what happens on top surfaces.");
+    def->enum_keys_map = &ConfigOptionEnum<FuzzySkinTopArea>::get_enum_values();
+    def->enum_values.push_back("all");
+    def->enum_values.push_back("painted_only");
+    def->enum_labels.push_back(L("All top surfaces"));
+    def->enum_labels.push_back(L("Painted only"));
+    def->mode = comSimple;
+    def->set_default_value(new ConfigOptionEnum<FuzzySkinTopArea>(FuzzySkinTopArea::AllTopSurfaces));
 
     def = this->add("fuzzy_skin_top_params", coEnum);
     def->label = L("Top surface parameters");
