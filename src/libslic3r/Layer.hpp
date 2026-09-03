@@ -201,6 +201,8 @@ public:
                                                                            FillLightning::Generator* lightning_generator) const;
     void 					make_ironing();
     void                    make_contour_z(const sla::IndexedMesh &mesh);
+    // ORCA: fuzzy skin on top surfaces; see Feature/FuzzySkin/FuzzySkinTop.cpp
+    void                    make_fuzzy_skin_top();
 
     void                    export_region_slices_to_svg(const char *path) const;
     void                    export_region_fill_surfaces_to_svg(const char *path) const;
